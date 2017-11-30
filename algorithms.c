@@ -20,7 +20,61 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "algorithms.h"
+
+
+/******************
+ *   DATA TYPES   *
+ ******************/
+
+
+/* Forward declaration of the Node type for use by NodeList.
+ *
+ * The type declarations here are a little * convoluted as Node and NodeList are mutually recursive,
+ * and NodeList is also recursive on itself.
+ */
+struct Node;
+
+
+typedef struct NodeList_rec {
+    struct Node* node;
+    struct NodeList_rec* next;
+} NodeList;
+
+
+typedef struct Node {
+    char nodeval;
+    NodeList* neighbors;
+} Node;
+
+
+typedef struct {
+    size_t n;
+    Node* nodes;
+} Graph;
+
+
+/* Construct a graph from a string of single-letter node names and a string of space-separated
+ * edges, e.g. "AB BC".
+ *
+ * The first argument should be either DIRECTED or UNDIRECTED depending on how you want the edges
+ * string to be interpreted.
+ *
+ * All graphs allocated with this function must be passed to graph_free when they are no longer
+ * needed, to prevent memory leaks.
+ */
+enum GraphType { DIRECTED, UNDIRECTED };
+Graph* graph_from_string(enum GraphType, const char* nodes, const char* edges);
+
+
+/* Free a graph's memory. Do not use the graph after calling this function! */
+void graph_free(Graph*);
+
+
+/* Print the nodes and edges of the graph as strings. */
+void print_graph(const Graph*);
 
 
 /*****************************************************
@@ -144,6 +198,107 @@ long long binary_search(int array[], size_t n, int datum) {
  *************************/
 
 
+/* Add a directed edge to the graph. */
+void graph_add_edge(Graph* g, char from, char to) {
+    /* Find the nodes in the graph's node list. */
+    Node* from_node = NULL, *to_node = NULL;
+    for (size_t i = 0; i < g->n; i++) {
+        if (g->nodes[i].nodeval == from) {
+            from_node = &g->nodes[i];
+        }
+        if (g->nodes[i].nodeval == to) {
+            to_node = &g->nodes[i];
+        }
+    }
+    if (from_node == NULL || to_node == NULL) return;
+    /* Make sure the edge doesn't actually exist. */
+    NodeList* ptr = from_node->neighbors;
+    while (ptr != NULL) {
+        if (ptr->node == to_node) {
+            return;
+        }
+        ptr = ptr->next;
+    }
+    /* Construct the new entry in the node's edge list. */
+    NodeList* new_ptr = malloc(sizeof *new_ptr);
+    if (new_ptr) {
+        new_ptr->node = to_node;
+        new_ptr->next = from_node->neighbors;
+        from_node->neighbors = new_ptr;
+    }
+}
+
+
+Graph* graph_from_string(enum GraphType typ, const char* nodes, const char* edges) {
+    Graph* ret = malloc(sizeof *ret);
+    if (ret) {
+        ret->n = strlen(nodes);
+        ret->nodes = malloc(ret->n * sizeof *ret->nodes);
+        if (ret->nodes) {
+            /* Add the nodes. */
+            for (size_t i = 0; i < ret->n; i++) {
+                ret->nodes[i].nodeval = nodes[i];
+                ret->nodes[i].neighbors = NULL;
+            }
+            /* Add the edges. */
+            size_t i = 0;
+            size_t n = strlen(edges);
+            while (i < n) {
+                graph_add_edge(ret, edges[i], edges[i+1]);
+                if (typ == UNDIRECTED) {
+                    graph_add_edge(ret, edges[i+1], edges[i]);
+                }
+                i += 3;
+            }
+        }
+    }
+    return ret;
+}
+
+
+void node_list_free(NodeList* p) {
+    if (p == NULL) return;
+    node_list_free(p->next);
+    free(p);
+}
+
+
+void graph_free(Graph* g) {
+    if (g == NULL) return;
+    for (size_t i = 0; i < g->n; i++) {
+        node_list_free(g->nodes[i].neighbors);
+    }
+    free(g->nodes);
+    free(g);
+}
+
+
+void print_graph(const Graph* g) {
+    if (g == NULL) return;
+
+    printf("NODES: ");
+    for (size_t i = 0; i < g->n; i++) {
+        printf("%c", g->nodes[i].nodeval);
+        if (i != g->n - 1) {
+            printf(", ");
+        } else {
+            printf("\n");
+        }
+    }
+
+    printf("EDGES: ");
+    for (size_t i = 0; i < g->n; i++) {
+        char c = g->nodes[i].nodeval;
+        NodeList* p = g->nodes[i].neighbors;
+        while (p != NULL) {
+            printf("%c%c ", c, p->node->nodeval);
+            p = p->next;
+        }
+    }
+    printf("\n");
+}
+
+
 void swap(int array[], size_t i, size_t j) {
     int tmp = array[i];
     array[i] = array[j];
@@ -215,6 +370,10 @@ void run_tests(void) {
     ASSERT(binary_search(bs_data, 5, 9) == 3);
     ASSERT(binary_search(bs_data, 5, 17) == 4);
     ASSERT(binary_search(bs_data, 5, 42) == -1);
+
+    Graph* g = graph_from_string(UNDIRECTED, "ABCDEFG", "AB BD GA");
+    print_graph(g);
+    graph_free(g);
 
     if (tests_failed > 0) {
         printf("FAILED %d tests.\n", tests_failed);
