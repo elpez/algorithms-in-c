@@ -28,7 +28,7 @@
  *****************************************************/
 
 
-/* Sort the elements of `array` in place.
+/* Sort the elements of `array` in ascending order.
  *
  *   Idea: Find the smallest number and swap it with the first element. Find the second smallest
  *   number and swap it with the second element, and so on until the list is sorted.
@@ -74,6 +74,35 @@ long long linear_search(int array[], size_t n, int datum) {
             return i;
     }
     return -1;
+}
+
+
+/****************************************
+ *   CHAPTER 4 - DECREASE and CONQUER   *
+ ****************************************/
+
+
+/* Sort the elements of `array` in ascending order.
+ *
+ *   Idea: Recursively sort the first n-1 elements of the array, and then insert the last element
+ *   into its proper position in the sorted array.
+ *
+ *   Time analysis: In the worst case (when the array is already sorted in descenidng order), the
+ *   inner loop runs 1 + 2 + 3 + ... + n-1 times, so as with selection sort the time complexity is
+ *   O(n^2).
+ *
+ *   Space analysis: O(1).
+ */
+void insertion_sort(int array[], size_t n) {
+    for (size_t i = 1; i < n; i++) {
+        int v = array[i];
+        size_t j = i-1;
+        while (j >= 0 && array[j] > v) {
+            array[j+1] = array[j];
+            j--;
+        }
+        array[j+1] = v;
+    }
 }
 
 
@@ -141,6 +170,9 @@ void run_tests(void) {
     ASSERT(linear_search(data, 5, 3) == 2);
     ASSERT(linear_search(data, 5, 1) == 0);
     ASSERT(linear_search(data, 5, 7) == -1);
+
+    /* INSERTION SORT */
+    ASSERT(test_sorting_f(insertion_sort) == 0);
 
     if (tests_failed > 0) {
         printf("FAILED %d tests.\n", tests_failed);
