@@ -194,18 +194,17 @@ long long binary_search(int array[], size_t n, int datum) {
  *
  *  Space analysis: O(|V|) for the counts array.
  */
-int depth_first_search_one_vertex(const Graph* g, size_t index, int counts[], int max_count) {
-    max_count += 1;
-    counts[index] = max_count;
+void depth_first_search_one_vertex(const Graph* g, size_t index, int counts[], int* max_count) {
+    *max_count += 1;
+    counts[index] = *max_count;
     VertexList* p = g->vertices[index].neighbors;
     while (p != NULL) {
         /* Only go to unvisited vertices. */
         if (counts[p->index] == 0) {
-            max_count = depth_first_search_one_vertex(g, p->index, counts, max_count);
+            depth_first_search_one_vertex(g, p->index, counts, max_count);
         }
         p = p->next;
     }
-    return max_count;
 }
 
 int* depth_first_search(const Graph* g) {
@@ -216,7 +215,7 @@ int* depth_first_search(const Graph* g) {
     /* Visit each component of the graph. */
     for (size_t i = 0; i < g->n; i++) {
         if (counts[i] == 0) {
-            max_count = depth_first_search_one_vertex(g, i, counts, max_count);
+            depth_first_search_one_vertex(g, i, counts, &max_count);
         }
     }
     return counts;
