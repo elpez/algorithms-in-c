@@ -106,6 +106,39 @@ void insertion_sort(int array[], size_t n) {
 }
 
 
+/* Return a position of `datum` in the sorted array, or -1 if `datum` is not present.
+ *
+ *   Idea: Consider the middle element. If the datum is smaller, then recursively consider the left
+ *   half of the array. If the datum is larger, consider the right half.
+ *
+ *   Time analysis: Each iteration of the loop reduces the size of the array to be considered by
+ *   half, so in the worst case the loop runs for the number of times that n can be divided by two.
+ *   This number is within a constant of log n, so the time complexity is O(log n).
+ *
+ *   Space analysis: O(1).
+ */
+long long binary_search(int array[], size_t n, int datum) {
+    size_t start = 0, end = n;
+    while (start < end) {
+        size_t mid = (end + start) / 2;
+        int midval = array[mid];
+        if (midval == datum) {
+            return mid;
+        } else if (midval < datum) {
+            start = mid + 1;
+        } else {
+            end = mid;
+        }
+    }
+    return -1;
+}
+
+
+/**************************************
+ *   CHAPTER 5 - DIVIDE and CONQUER   *
+ **************************************/
+
+
 /*************************
  *   UTILITY FUNCTIONS   *
  *************************/
@@ -166,13 +199,22 @@ void run_tests(void) {
     ASSERT(test_sorting_f(selection_sort) == 0);
 
     /* LINEAR SEARCH */
-    int data[] = {1, 2, 3, 4, 3};
-    ASSERT(linear_search(data, 5, 3) == 2);
-    ASSERT(linear_search(data, 5, 1) == 0);
-    ASSERT(linear_search(data, 5, 7) == -1);
+    int ls_data[] = {1, 2, 3, 4, 3};
+    ASSERT(linear_search(ls_data, 5, 3) == 2);
+    ASSERT(linear_search(ls_data, 5, 1) == 0);
+    ASSERT(linear_search(ls_data, 5, 7) == -1);
 
     /* INSERTION SORT */
     ASSERT(test_sorting_f(insertion_sort) == 0);
+
+    /* BINARY SEARCH */
+    int bs_data[] = {-7, 4, 8, 9, 17};
+    ASSERT(binary_search(bs_data, 5, -7) == 0);
+    ASSERT(binary_search(bs_data, 5, 4) == 1);
+    ASSERT(binary_search(bs_data, 5, 8) == 2);
+    ASSERT(binary_search(bs_data, 5, 9) == 3);
+    ASSERT(binary_search(bs_data, 5, 17) == 4);
+    ASSERT(binary_search(bs_data, 5, 42) == -1);
 
     if (tests_failed > 0) {
         printf("FAILED %d tests.\n", tests_failed);
