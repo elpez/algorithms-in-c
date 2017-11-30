@@ -30,33 +30,26 @@
  ******************/
 
 
-/* Forward declaration of the Node type for use by NodeList.
- *
- * The type declarations here are a little * convoluted as Node and NodeList are mutually recursive,
- * and NodeList is also recursive on itself.
- */
-struct Node;
+typedef struct VertexList_rec {
+    /* The index of the vertex in the graph's vertices array. */
+    size_t index;
+    struct VertexList_rec* next;
+} VertexList;
 
 
-typedef struct NodeList_rec {
-    struct Node* node;
-    struct NodeList_rec* next;
-} NodeList;
-
-
-typedef struct Node {
-    char nodeval;
-    NodeList* neighbors;
-} Node;
+typedef struct {
+    char val;
+    VertexList* neighbors;
+} Vertex;
 
 
 typedef struct {
     size_t n;
-    Node* nodes;
+    Vertex* vertices;
 } Graph;
 
 
-/* Construct a graph from a string of single-letter node names and a string of space-separated
+/* Construct a graph from a string of single-letter vertex names and a string of space-separated
  * edges, e.g. "AB BC".
  *
  * The first argument should be either DIRECTED or UNDIRECTED depending on how you want the edges
@@ -66,14 +59,14 @@ typedef struct {
  * needed, to prevent memory leaks.
  */
 enum GraphType { DIRECTED, UNDIRECTED };
-Graph* graph_from_string(enum GraphType, const char* nodes, const char* edges);
+Graph* graph_from_string(enum GraphType, const char* vertices, const char* edges);
 
 
 /* Free a graph's memory. Do not use the graph after calling this function! */
 void graph_free(Graph*);
 
 
-/* Print the nodes and edges of the graph as strings. */
+/* Print the vertices and edges of the graph as strings. */
 void print_graph(const Graph*);
 
 
@@ -188,6 +181,48 @@ long long binary_search(int array[], size_t n, int datum) {
 }
 
 
+/* Traverse the graph depth-first and return an array indicating the order in which each vertex was
+ * visited, starting at 1, so if A[7] = 2 then the eighth vertex (g->vertices[7]) was the second
+ * vertex visited. The array is allocated with malloc and should be deallocated with free.
+ *
+ *  Idea: Mark each vertex of the graph with 0. Visit the first vertex, mark it with 1, then visit
+ *  that vertex's first (unmarked) neighbor, mark it with 2, and continue until you reach a dead
+ *  end. Backtrack to a vertex with unmarked neighbors and continue from there.
+ *
+ *  Time analysis: Every vertex must be visited, and each edge of every vertex must be considered,
+ *  so the time complexity is O(|E| + |V|).
+ *
+ *  Space analysis: O(|V|) for the counts array.
+ */
+int depth_first_search_one_vertex(const Graph* g, size_t index, int counts[], int max_count) {
+    max_count += 1;
+    counts[index] = max_count;
+    VertexList* p = g->vertices[index].neighbors;
+    while (p != NULL) {
+        /* Only go to unvisited vertices. */
+        if (counts[p->index] == 0) {
+            max_count = depth_first_search_one_vertex(g, p->index, counts, max_count);
+        }
+        p = p->next;
+    }
+    return max_count;
+}
+
+int* depth_first_search(const Graph* g) {
+    if (g == NULL) return NULL;
+    int* counts = calloc(g->n, sizeof *counts);
+    int max_count = 0;
+    if (counts == NULL) return NULL;
+    /* Visit each component of the graph. */
+    for (size_t i = 0; i < g->n; i++) {
+        if (counts[i] == 0) {
+            max_count = depth_first_search_one_vertex(g, i, counts, max_count);
+        }
+    }
+    return counts;
+}
+
+
 /**************************************
  *   CHAPTER 5 - DIVIDE and CONQUER   *
  **************************************/
@@ -200,45 +235,46 @@ long long binary_search(int array[], size_t n, int datum) {
 
 /* Add a directed edge to the graph. */
 void graph_add_edge(Graph* g, char from, char to) {
-    /* Find the nodes in the graph's node list. */
-    Node* from_node = NULL, *to_node = NULL;
+    /* Find the vertices in the graph's vertex list. */
+    Vertex* from_vertex = NULL;
+    long long to_index = -1;
     for (size_t i = 0; i < g->n; i++) {
-        if (g->nodes[i].nodeval == from) {
-            from_node = &g->nodes[i];
+        if (g->vertices[i].val == from) {
+            from_vertex = &g->vertices[i];
         }
-        if (g->nodes[i].nodeval == to) {
-            to_node = &g->nodes[i];
+        if (g->vertices[i].val == to) {
+            to_index = i;
         }
     }
-    if (from_node == NULL || to_node == NULL) return;
+    if (from_vertex == NULL || to_index == -1) return;
     /* Make sure the edge doesn't actually exist. */
-    NodeList* ptr = from_node->neighbors;
+    VertexList* ptr = from_vertex->neighbors;
     while (ptr != NULL) {
-        if (ptr->node == to_node) {
+        if (ptr->index == to_index) {
             return;
         }
         ptr = ptr->next;
     }
-    /* Construct the new entry in the node's edge list. */
-    NodeList* new_ptr = malloc(sizeof *new_ptr);
+    /* Construct the new entry in the vertex's edge list. */
+    VertexList* new_ptr = malloc(sizeof *new_ptr);
     if (new_ptr) {
-        new_ptr->node = to_node;
-        new_ptr->next = from_node->neighbors;
-        from_node->neighbors = new_ptr;
+        new_ptr->index = to_index;
+        new_ptr->next = from_vertex->neighbors;
+        from_vertex->neighbors = new_ptr;
     }
 }
 
 
-Graph* graph_from_string(enum GraphType typ, const char* nodes, const char* edges) {
+Graph* graph_from_string(enum GraphType typ, const char* vertices, const char* edges) {
     Graph* ret = malloc(sizeof *ret);
     if (ret) {
-        ret->n = strlen(nodes);
-        ret->nodes = malloc(ret->n * sizeof *ret->nodes);
-        if (ret->nodes) {
-            /* Add the nodes. */
+        ret->n = strlen(vertices);
+        ret->vertices = malloc(ret->n * sizeof *ret->vertices);
+        if (ret->vertices) {
+            /* Add the vertices. */
             for (size_t i = 0; i < ret->n; i++) {
-                ret->nodes[i].nodeval = nodes[i];
-                ret->nodes[i].neighbors = NULL;
+                ret->vertices[i].val = vertices[i];
+                ret->vertices[i].neighbors = NULL;
             }
             /* Add the edges. */
             size_t i = 0;
@@ -256,9 +292,9 @@ Graph* graph_from_string(enum GraphType typ, const char* nodes, const char* edge
 }
 
 
-void node_list_free(NodeList* p) {
+void vertex_list_free(VertexList* p) {
     if (p == NULL) return;
-    node_list_free(p->next);
+    vertex_list_free(p->next);
     free(p);
 }
 
@@ -266,9 +302,9 @@ void node_list_free(NodeList* p) {
 void graph_free(Graph* g) {
     if (g == NULL) return;
     for (size_t i = 0; i < g->n; i++) {
-        node_list_free(g->nodes[i].neighbors);
+        vertex_list_free(g->vertices[i].neighbors);
     }
-    free(g->nodes);
+    free(g->vertices);
     free(g);
 }
 
@@ -278,7 +314,7 @@ void print_graph(const Graph* g) {
 
     printf("NODES: ");
     for (size_t i = 0; i < g->n; i++) {
-        printf("%c", g->nodes[i].nodeval);
+        printf("%c", g->vertices[i].val);
         if (i != g->n - 1) {
             printf(", ");
         } else {
@@ -288,10 +324,10 @@ void print_graph(const Graph* g) {
 
     printf("EDGES: ");
     for (size_t i = 0; i < g->n; i++) {
-        char c = g->nodes[i].nodeval;
-        NodeList* p = g->nodes[i].neighbors;
+        char c = g->vertices[i].val;
+        VertexList* p = g->vertices[i].neighbors;
         while (p != NULL) {
-            printf("%c%c ", c, p->node->nodeval);
+            printf("%c%c ", c, g->vertices[p->index].val);
             p = p->next;
         }
     }
@@ -371,8 +407,18 @@ void run_tests(void) {
     ASSERT(binary_search(bs_data, 5, 17) == 4);
     ASSERT(binary_search(bs_data, 5, 42) == -1);
 
-    Graph* g = graph_from_string(UNDIRECTED, "ABCDEFG", "AB BD GA");
-    print_graph(g);
+    /* DEPTH-FIRST SEARCH */
+    Graph* g = graph_from_string(DIRECTED, "ABCDEFG", "AB AC BG BE CF DA DB DC DF DG GF");
+    int* counts = depth_first_search(g);
+    /* Expected order: A, C, F, B, E, G, D */
+    ASSERT(counts[0] == 1);
+    ASSERT(counts[2] == 2);
+    ASSERT(counts[5] == 3);
+    ASSERT(counts[1] == 4);
+    ASSERT(counts[4] == 5);
+    ASSERT(counts[6] == 6);
+    ASSERT(counts[3] == 7);
+    free(counts);
     graph_free(g);
 
     if (tests_failed > 0) {
