@@ -19,6 +19,7 @@
  *  of the utility functions defined in algorithms.h, and a test suite and main function.
  */
 
+#include <stdio.h>
 #include "algorithms.h"
 
 
@@ -58,6 +59,24 @@ void selection_sort(int array[], size_t n) {
 }
 
 
+/* Return the first position of `datum` in the array, or -1 if `datum` is not present.
+ *
+ *   Idea: Examine each element in turn.
+ *
+ *   Time analysis: In the worst case, the datum is not in the array and every element is examined,
+ *   so O(n).
+ *
+ *   Space analysis: O(1).
+ */
+long long linear_search(int array[], size_t n, int datum) {
+    for (size_t i = 0; i < n; i++) {
+        if (array[i] == datum)
+            return i;
+    }
+    return -1;
+}
+
+
 /*************************
  *   UTILITY FUNCTIONS   *
  *************************/
@@ -75,8 +94,59 @@ void swap(int array[], size_t i, size_t j) {
  ***************************/
 
 
+/* This is defined as a macro to preserve the line number. It assumes the existence of a variable
+ * tests_failed, which it updates.
+ */
+#define ASSERT(cond) \
+    if (!(cond)) { \
+        printf("Failed test \"%s\" at line %d in %s\n", #cond, __LINE__, __FILE__); \
+        tests_failed++; \
+    }
+
+
+/* Return 1 if the array is sorted in ascending order, 0 otherwise. */
+int is_sorted(int* data, size_t n) {
+    for (size_t i = 0; i < n-1; i++) {
+        if (data[i] > data[i+1]) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+
+typedef void sorting_f(int*, size_t);
+
+/* Run the sorting test suite against an arbitrary sorting function. */
+int test_sorting_f(sorting_f f) {
+    int data[] = {-8, 99, 7, 8, 9, -2, 0, 1, 4, 59, 42, 10};
+    size_t n = 12;
+    f(data, n);
+    if (is_sorted(data, n)) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+
 void run_tests(void) {
-    return;
+    int tests_failed = 0;
+
+    /* SELECTION SORT */
+    ASSERT(test_sorting_f(selection_sort) == 0);
+
+    /* LINEAR SEARCH */
+    int data[] = {1, 2, 3, 4, 3};
+    ASSERT(linear_search(data, 5, 3) == 2);
+    ASSERT(linear_search(data, 5, 1) == 0);
+    ASSERT(linear_search(data, 5, 7) == -1);
+
+    if (tests_failed > 0) {
+        printf("FAILED %d tests.\n", tests_failed);
+    } else {
+        printf("PASSED all tests.\n");
+    }
 }
 
 
