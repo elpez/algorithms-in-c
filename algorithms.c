@@ -19,6 +19,7 @@
  *  of the utility functions defined in algorithms.h, and a test suite and main function.
  */
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -233,6 +234,54 @@ void merge(int left[], size_t left_len, int right[], size_t right_len, int targe
 }
 
 
+/* Sort the elements of `array` in ascending order.
+ *
+ *   Idea: Pick an arbitrary element, called the pivot. Put all smaller elements before the pivot
+ *   in the array, and all larger elements after it. Recursively sort the two partitions of the
+ *   array made by the pivot.
+ *
+ *   Time analysis: In the worst case, partitioning always reduce the array's size by 1, so n
+ *   partitions, each of which take O(n) time, are needed, so the algorithm is O(n^2). In the
+ *   average case, each partition divides the array roughly in half, and so log n partitions are
+ *   performed, giving a complexity of O(n log n).
+ *
+ *   Space analysis: In this implementation, the worst case is O(n) since there may be as many as
+ *   n recursive calls to quicksort_helper. More complicated implementations can get O(log n) space
+ *   according to Wikipedia.
+ */
+void quicksort(int array[], size_t n) {
+    quicksort_helper(array, 0, n);
+}
+
+void quicksort_helper(int array[], size_t start, size_t end) {
+    if (start < end - 1) {
+        size_t s = partition(array, start, end);
+        quicksort_helper(array, start, s);
+        quicksort_helper(array, s, end);
+    }
+}
+
+size_t partition(int array[], size_t start, size_t end) {
+    int pivot = array[start];
+    size_t i = start + 1;
+    size_t j = end - 1;
+    do {
+        /* Set i to be the first element in the array greater than the pivot. */
+        while (array[i] < pivot && i < end-1) {
+            i++;
+        }
+        /* Set j to be the last element in the array less than the pivot. */
+        while (array[j] > pivot) {
+            j--;
+        }
+        swap(array, i, j);
+    } while (i < j);
+    swap(array, i, j);
+    swap(array, start, j);
+    return (j == start) ? j+1 : j;
+}
+
+
 /*************************
  *   UTILITY FUNCTIONS   *
  *************************/
@@ -359,6 +408,18 @@ int* copy_array(int source[], size_t start, size_t end) {
 }
 
 
+void print_array(int array[], size_t n) {
+    printf("[");
+    for (size_t i = 0; i < n; i++) {
+        printf("%d", array[i]);
+        if (i != n - 1) {
+            printf(", ");
+        }
+    }
+    printf("]\n");
+}
+
+
 /***************************
  *   TEST SUITE and MAIN   *
  ***************************/
@@ -378,6 +439,19 @@ int* copy_array(int source[], size_t start, size_t end) {
 int is_sorted(int* data, size_t n) {
     for (size_t i = 0; i < n-1; i++) {
         if (data[i] > data[i+1]) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+
+int array_eq(size_t n, int array[], ...) {
+    va_list args;
+    va_start(args, array);
+    for (size_t i = 0; i < n; i++) {
+        int x = va_arg(args, int);
+        if (array[i] != x) {
             return 0;
         }
     }
@@ -428,18 +502,15 @@ void run_tests(void) {
     Graph* g = graph_from_string(DIRECTED, "ABCDEFG", "AB AC BG BE CF DA DB DC DF DG GF");
     int* counts = depth_first_search(g);
     /* Expected order: A, C, F, B, E, G, D */
-    ASSERT(counts[0] == 1);
-    ASSERT(counts[2] == 2);
-    ASSERT(counts[5] == 3);
-    ASSERT(counts[1] == 4);
-    ASSERT(counts[4] == 5);
-    ASSERT(counts[6] == 6);
-    ASSERT(counts[3] == 7);
+    ASSERT(array_eq(7, counts, 1, 4, 2, 7, 5, 3, 6));
     free(counts);
     graph_free(g);
 
     /* MERGE SORT */
     ASSERT(test_sorting_f(merge_sort) == 0);
+
+    /* QUICKSORT */
+    ASSERT(test_sorting_f(quicksort) == 0);
 
     if (tests_failed > 0) {
         printf("FAILED %d tests.\n", tests_failed);

@@ -81,6 +81,10 @@ int* depth_first_search(const Graph* g);
 void merge_sort(int array[], size_t n);
 void merge(int left[], size_t left_len, int right[], size_t right_len, int target[]);
 
+void quicksort(int array[], size_t n);
+void quicksort_helper(int array[], size_t start, size_t end);
+size_t partition(int array[], size_t start, size_t end);
+
 
 /*************************
  *   UTILITY FUNCTIONS   *
@@ -90,5 +94,7 @@ void merge(int left[], size_t left_len, int right[], size_t right_len, int targe
 void swap(int array[], size_t i, size_t j);
 
 int* copy_array(int source[], size_t start, size_t end);
+int array_eq(size_t n, int array[], ...);
+void print_array(int array[], size_t n);
 
 #endif
