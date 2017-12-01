@@ -25,51 +25,6 @@
 #include "algorithms.h"
 
 
-/******************
- *   DATA TYPES   *
- ******************/
-
-
-typedef struct VertexList_rec {
-    /* The index of the vertex in the graph's vertices array. */
-    size_t index;
-    struct VertexList_rec* next;
-} VertexList;
-
-
-typedef struct {
-    char val;
-    VertexList* neighbors;
-} Vertex;
-
-
-typedef struct {
-    size_t n;
-    Vertex* vertices;
-} Graph;
-
-
-/* Construct a graph from a string of single-letter vertex names and a string of space-separated
- * edges, e.g. "AB BC".
- *
- * The first argument should be either DIRECTED or UNDIRECTED depending on how you want the edges
- * string to be interpreted.
- *
- * All graphs allocated with this function must be passed to graph_free when they are no longer
- * needed, to prevent memory leaks.
- */
-enum GraphType { DIRECTED, UNDIRECTED };
-Graph* graph_from_string(enum GraphType, const char* vertices, const char* edges);
-
-
-/* Free a graph's memory. Do not use the graph after calling this function! */
-void graph_free(Graph*);
-
-
-/* Print the vertices and edges of the graph as strings. */
-void print_graph(const Graph*);
-
-
 /*****************************************************
  *   CHAPTER 3 - BRUTE FORCE and EXHAUSTIVE SEARCH   *
  *****************************************************/
@@ -134,7 +89,7 @@ long long linear_search(int array[], size_t n, int datum) {
  *   Idea: Recursively sort the first n-1 elements of the array, and then insert the last element
  *   into its proper position in the sorted array.
  *
- *   Time analysis: In the worst case (when the array is already sorted in descenidng order), the
+ *   Time analysis: In the worst case (when the array is already sorted in descending order), the
  *   inner loop runs 1 + 2 + 3 + ... + n-1 times, so as with selection sort the time complexity is
  *   O(n^2).
  *
@@ -225,6 +180,57 @@ int* depth_first_search(const Graph* g) {
 /**************************************
  *   CHAPTER 5 - DIVIDE and CONQUER   *
  **************************************/
+
+
+/* Sort the elements of `array` in ascending order.
+ *
+ *   Idea: Recursively sort each half of the array, and then merge the two sorted halves them.
+ *
+ *   Time analysis: The recurrence relation for this algorithm is T(n) = 2*T(n/2) + O(n), since
+ *   merging is linear. The time complexity is thus O(n log n) by the master method.
+ *
+ *   Space analysis: A copy of the array must be made prior to merging, which takes O(n) space.
+ */
+void merge_sort(int array[], size_t n) {
+    if (n >= 2) {
+        int* left = copy_array(array, 0, n/2);
+        int* right = copy_array(array, n/2, n);
+        merge_sort(left, n/2);
+        merge_sort(right, n-n/2);
+        merge(left, n/2, right, n-n/2, array);
+        free(left);
+        free(right);
+    }
+}
+
+
+/* Merge the sorted arrays `left` and `right`, into `target`, which must be at least as long as
+ * `left` and `right` combined.
+ */
+void merge(int left[], size_t left_len, int right[], size_t right_len, int target[]) {
+    size_t left_index = 0, right_index = 0;
+    while (left_index < left_len && right_index < right_len) {
+        /* Take the smaller element from the fronts of the two arrays. */
+        if (left[left_index] <= right[right_index]) {
+            target[left_index+right_index] = left[left_index];
+            left_index++;
+        } else {
+            target[left_index+right_index] = right[right_index];
+            right_index++;
+        }
+    }
+    /* Take any remaining elements from the two arrays (since one array might be one element longer
+     * than the other).
+     */
+    while (left_index < left_len) {
+        target[left_index+right_index] = left[left_index];
+        left_index++;
+    }
+    while (right_index < right_len) {
+        target[left_index+right_index] = right[right_index];
+        right_index++;
+    }
+}
 
 
 /*************************
@@ -341,6 +347,18 @@ void swap(int array[], size_t i, size_t j) {
 }
 
 
+int* copy_array(int source[], size_t start, size_t end) {
+    size_t n = end - start;
+    int* ret = malloc(n * sizeof *ret);
+    if (ret) {
+        for (size_t i = 0; i < n; i++) {
+            ret[i] = source[start+i];
+        }
+    }
+    return ret;
+}
+
+
 /***************************
  *   TEST SUITE and MAIN   *
  ***************************/
@@ -419,6 +437,9 @@ void run_tests(void) {
     ASSERT(counts[3] == 7);
     free(counts);
     graph_free(g);
+
+    /* MERGE SORT */
+    ASSERT(test_sorting_f(merge_sort) == 0);
 
     if (tests_failed > 0) {
         printf("FAILED %d tests.\n", tests_failed);
