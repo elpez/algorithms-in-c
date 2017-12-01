@@ -250,35 +250,38 @@ void merge(int left[], size_t left_len, int right[], size_t right_len, int targe
  *   according to Wikipedia.
  */
 void quicksort(int array[], size_t n) {
-    quicksort_helper(array, 0, n);
+    quicksort_helper(array, 0, n-1);
 }
 
 void quicksort_helper(int array[], size_t start, size_t end) {
-    if (start < end - 1) {
+    if (start < end) {
         size_t s = partition(array, start, end);
         quicksort_helper(array, start, s);
-        quicksort_helper(array, s, end);
+        quicksort_helper(array, s+1, end);
     }
 }
 
 size_t partition(int array[], size_t start, size_t end) {
+    /* Note: this partition algorithm is closely based on the one in the Wikipedia article for
+     * quicksort.
+     */
     int pivot = array[start];
-    size_t i = start + 1;
-    size_t j = end - 1;
-    do {
+    size_t i = start - 1;
+    size_t j = end + 1;
+    while (1) {
         /* Set i to be the first element in the array greater than the pivot. */
-        while (array[i] < pivot && i < end-1) {
+        do {
             i++;
-        }
+        } while (array[i] < pivot && i < end);
         /* Set j to be the last element in the array less than the pivot. */
-        while (array[j] > pivot) {
+        do {
             j--;
+        } while (array[j] > pivot);
+        if (i >= j) {
+            return j;
         }
         swap(array, i, j);
-    } while (i < j);
-    swap(array, i, j);
-    swap(array, start, j);
-    return (j == start) ? j+1 : j;
+    }
 }
 
 
