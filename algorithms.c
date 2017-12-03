@@ -178,32 +178,33 @@ long long binary_search(int array[], size_t n, int datum) {
  *  Time analysis: Every vertex must be visited, and each edge of every vertex must be considered,
  *  so the time complexity is O(|E| + |V|).
  *
- *  Space analysis: O(|V|) for the counts array.
+ *  Space analysis: O(|V|) for the counts array and vertex stack.
  */
-void depth_first_search_one_vertex(const Graph* g, size_t index, int counts[], int* max_count) {
-    *max_count += 1;
-    counts[index] = *max_count;
-    VertexList* p = g->vertices[index].neighbors;
-    while (p != NULL) {
-        /* Only go to unvisited vertices. */
-        if (counts[p->index] == 0) {
-            depth_first_search_one_vertex(g, p->index, counts, max_count);
-        }
-        p = p->next;
-    }
-}
-
 int* depth_first_search(const Graph* g) {
+    #define STACK_POP() (stack[--end_of_stack])
+    #define STACK_PUSH(val) stack[end_of_stack++] = (val)
     if (g == NULL) return NULL;
+    size_t end_of_stack = 0;
+    size_t* stack = malloc(g->n * sizeof *stack);
     int* counts = calloc(g->n, sizeof *counts);
     int max_count = 0;
-    if (counts == NULL) return NULL;
-    /* Visit each component of the graph. */
+    /* Start at each vertex (this ensures that every component is visited). */
     for (size_t i = 0; i < g->n; i++) {
-        if (counts[i] == 0) {
-            depth_first_search_one_vertex(g, i, counts, &max_count);
+        STACK_PUSH(i);
+        while (end_of_stack > 0) {
+            size_t this_vertex = STACK_POP();
+            if (counts[this_vertex] == 0) {
+                counts[this_vertex] = ++max_count;
+                VertexList* p = g->vertices[this_vertex].neighbors;
+                /* Push all adjacents vertices onto the stack. */
+                while (p != NULL) {
+                    STACK_PUSH(p->index);
+                    p = p->next;
+                }
+            }
         }
     }
+    free(stack);
     return counts;
 }
 
@@ -611,8 +612,8 @@ void run_tests(void) {
     /* DEPTH-FIRST SEARCH */
     Graph* g = graph_from_string(DIRECTED, "ABCDEFG", "AB AC BG BE CF DA DB DC DF DG GF");
     int* counts = depth_first_search(g);
-    /* Expected order: A, C, F, B, E, G, D */
-    ASSERT(array_eq(7, counts, 1, 4, 2, 7, 5, 3, 6));
+    /* Expected order: A, B, G, F, E, C, D */
+    ASSERT(array_eq(7, counts, 1, 2, 6, 7, 5, 4, 3));
     free(counts);
     graph_free(g);
 

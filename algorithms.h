@@ -78,7 +78,6 @@ void insertion_sort(int array[], size_t n);
 
 long long binary_search(int array[], size_t n, int datum);
 
-void depth_first_search_one_vertex(const Graph* g, size_t index, int counts[], int* max_count);
 int* depth_first_search(const Graph* g);
 
 
