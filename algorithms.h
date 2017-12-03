@@ -1,6 +1,8 @@
 #ifndef ALGORITHMS_H
 #define ALGORITHMS_H
 
+#include <math.h>
+
 
 /******************
  *   DATA TYPES   *
@@ -51,6 +53,11 @@ void vertex_list_free(VertexList* p);
 void print_graph(const Graph*);
 
 
+typedef struct {
+    double x, y;
+} Point;
+
+
 /*****************************************************
  *   CHAPTER 3 - BRUTE FORCE and EXHAUSTIVE SEARCH   *
  *****************************************************/
@@ -58,6 +65,8 @@ void print_graph(const Graph*);
 void selection_sort(int array[], size_t n);
 
 long long linear_search(int array[], size_t n, int datum);
+
+double closest_pair_brute_force(Point points[], size_t n);
 
 
 /****************************************
@@ -85,6 +94,8 @@ void quicksort(int array[], size_t n);
 void quicksort_helper(int array[], size_t start, size_t end);
 size_t partition(int array[], size_t start, size_t end);
 
+double closest_pair(Point sorted_by_x[], Point sorted_by_y[], size_t n);
+
 
 /*************************
  *   UTILITY FUNCTIONS   *
@@ -96,5 +107,7 @@ void swap(int array[], size_t i, size_t j);
 int* copy_array(int source[], size_t start, size_t end);
 int array_eq(size_t n, int array[], ...);
 void print_array(int array[], size_t n);
+
+#define distance_squared(p1, p2) (pow((p1).x - (p2).x, 2) + pow((p1).y - (p2).y, 2))
 
 #endif

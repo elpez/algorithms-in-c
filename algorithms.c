@@ -19,6 +19,7 @@
  *  of the utility functions defined in algorithms.h, and a test suite and main function.
  */
 
+#include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -77,6 +78,35 @@ long long linear_search(int array[], size_t n, int datum) {
             return i;
     }
     return -1;
+}
+
+
+/* Given the two lists of the same set of unique points, one in ascending order of the x-coordinate
+ * and the other in ascending order of the y-coordinate, return the distance between the two closest
+ * points.
+ *
+ *   Idea: Compute the distance between each pair of points and keep track of the minimum distance
+ *   seen so far.
+ *
+ *   Time analysis: The nested for loops consider roughly n^2 pairs of points, so O(n^2).
+ *
+ *   Space analysis: O(1).
+ */
+double closest_pair_brute_force(Point points[], size_t n) {
+    if (n >= 2) {
+        double closest_so_far = distance_squared(points[0], points[1]);
+        for (size_t i = 0; i < n-1; i++) {
+            for (size_t j = i+1; j < n; j++) {
+                double this_distance = distance_squared(points[i], points[j]);
+                if (this_distance < closest_so_far) {
+                    closest_so_far = this_distance;
+                }
+            }
+        }
+        return sqrt(closest_so_far);
+    } else {
+        return 0.0;
+    }
 }
 
 
@@ -285,6 +315,79 @@ size_t partition(int array[], size_t start, size_t end) {
 }
 
 
+/* Given the two lists of the same set of unique points, one in ascending order of the x-coordinate
+ * and the other in ascending order of the y-coordinate, return the distance between the two closest
+ * points.
+ *
+ *   Idea: Draw a vertical line through the median of the x-coordinates of the point, so that
+ *   half the points lie to the left of it and half the points lie to the right of it. Recursively
+ *   find the closest pairs in each half. The minimum of the two closest pairs, d, is not
+ *   necessarily the answer, though, because there could be a closer pair that spans the median.
+ *   Determine if any such pairs exist, and return their distance if found, otherwise d.
+ *
+ *   Time analysis: The recurrence relation is clearly T(n) = 2T(n/2) + f(n), since the algorithm
+ *   divides the problem in half and recurses on each half. The question then becomes, what is
+ *   the complexity of the dividing and combining steps? Dividing is clearly linear since the entire
+ *   array needs to be copied into two halves. Combining looks like it's quadratic, because it has
+ *   a nested loop. However, the geometry of the problem guarantees that the inner loop body will
+ *   run no more than 5 times, so combining is also linear. Thus, by the master method the overall
+ *   complexity is O(n log n), which is a significant improvement over the brute force method.
+ *
+ *   Space analysis: O(n), to make the copies of the arrays needed for the recursive calls.
+ */
+double closest_pair(Point sorted_by_x[], Point sorted_by_y[], size_t n) {
+    if (n > 3) {
+        size_t right_n = n / 2;
+        size_t left_n = n - right_n;
+        Point* right_sorted_x = malloc(right_n * sizeof *right_sorted_x);
+        Point* right_sorted_y = malloc(right_n * sizeof *right_sorted_y);
+        for (size_t i = 0; i < right_n; i++) {
+            right_sorted_x[i] = sorted_by_x[left_n + i];
+            right_sorted_y[i] = sorted_by_y[left_n + i];
+        }
+        Point* left_sorted_x = malloc(left_n * sizeof *left_sorted_x);
+        Point* left_sorted_y = malloc(left_n * sizeof *left_sorted_y);
+        for (size_t i = 0; i < left_n; i++) {
+            left_sorted_x[i] = sorted_by_x[i];
+            left_sorted_y[i] = sorted_by_y[i];
+        }
+        /* Recursively compute the closest pairs from the left and the right points. */
+        double d_left = closest_pair(left_sorted_x, left_sorted_y, left_n);
+        double d_right = closest_pair(right_sorted_x, right_sorted_y, right_n);
+        double d = fmin(d_left, d_right);
+        double m = sorted_by_x[left_n - 1].x;
+        Point* points_near_median = malloc(n * sizeof *points_near_median);
+        size_t num_near_median = 0;
+        for (size_t i = 0; i < n; i++) {
+            Point p = sorted_by_y[i];
+            if (abs(p.x - m) < d) {
+                points_near_median[num_near_median++] = p;
+            }
+        }
+        double d_sq = d*d;
+        /* Find any pairs of points between the two halves that are closer than the closest pairs
+         * in either half alone. This looks like a quadratic loop, but it's really not!
+         */
+        for (size_t i = 0; i < num_near_median - 2; i++) {
+            size_t k = i + 1;
+            double tmp = pow(points_near_median[k].y - points_near_median[i].y, 2);
+            while (k <= num_near_median - 1 && tmp < d_sq) {
+                d_sq = fmin(tmp + pow(points_near_median[k].x - points_near_median[i].x, 2), d_sq);
+                k++;
+            }
+        }
+        free(right_sorted_x);
+        free(right_sorted_y);
+        free(left_sorted_x);
+        free(left_sorted_y);
+        free(points_near_median);
+        return sqrt(d_sq);
+    } else {
+        return closest_pair_brute_force(sorted_by_x, n);
+    }
+}
+
+
 /*************************
  *   UTILITY FUNCTIONS   *
  *************************/
@@ -489,6 +592,10 @@ void run_tests(void) {
     ASSERT(linear_search(ls_data, 5, 1) == 0);
     ASSERT(linear_search(ls_data, 5, 7) == -1);
 
+    /* BRUTE-FORCE CLOSEST PAIR */
+    Point points[] = { {7, 3}, {7, 1}, {2, 3}, {3, 1} };
+    ASSERT(closest_pair_brute_force(points, 4) == 2);
+
     /* INSERTION SORT */
     ASSERT(test_sorting_f(insertion_sort) == 0);
 
@@ -514,6 +621,11 @@ void run_tests(void) {
 
     /* QUICKSORT */
     ASSERT(test_sorting_f(quicksort) == 0);
+
+    /* CLOSEST PAIR */
+    Point points_by_x[] = { {2, 3}, {3, 1}, {7, 3}, {7, 1} };
+    Point points_by_y[] = { {3, 1}, {7, 1}, {2, 3}, {7, 3} };
+    ASSERT(closest_pair(points_by_x, points_by_y, 4) == 2);
 
     if (tests_failed > 0) {
         printf("FAILED %d tests.\n", tests_failed);
