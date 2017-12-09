@@ -1,5 +1,4 @@
-#ifndef DATA_H
-#define DATA_H
+#pragma once
 
 
 typedef struct VertexList_rec {
@@ -49,5 +48,3 @@ void print_graph(const Graph*);
 typedef struct {
     double x, y;
 } Point;
-
-#endif

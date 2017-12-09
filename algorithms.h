@@ -1,5 +1,4 @@
-#ifndef ALGORITHMS_H
-#define ALGORITHMS_H
+#pragma once
 
 #include <math.h>
 #include "data.h"
@@ -55,5 +54,3 @@ int array_eq(size_t n, int array[], ...);
 void print_array(int array[], size_t n);
 
 #define distance_squared(p1, p2) (pow((p1).x - (p2).x, 2) + pow((p1).y - (p2).y, 2))
-
-#endif
