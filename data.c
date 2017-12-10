@@ -7,20 +7,20 @@
 void graph_add_edge(Graph* g, char from, char to) {
     /* Find the vertices in the graph's vertex list. */
     Vertex* from_vertex = NULL;
-    long long to_index = -1;
+    Vertex* to_vertex = NULL;
     for (size_t i = 0; i < g->n; i++) {
         if (g->vertices[i].val == from) {
             from_vertex = &g->vertices[i];
         }
         if (g->vertices[i].val == to) {
-            to_index = i;
+            to_vertex = &g->vertices[i];
         }
     }
-    if (from_vertex == NULL || to_index == -1) return;
+    if (from_vertex == NULL || to_vertex == NULL) return;
     /* Make sure the edge doesn't actually exist. */
     VertexList* ptr = from_vertex->neighbors;
     while (ptr != NULL) {
-        if (ptr->index == to_index) {
+        if (ptr->v == to_vertex) {
             return;
         }
         ptr = ptr->next;
@@ -28,7 +28,7 @@ void graph_add_edge(Graph* g, char from, char to) {
     /* Construct the new entry in the vertex's edge list. */
     VertexList* new_ptr = malloc(sizeof *new_ptr);
     if (new_ptr) {
-        new_ptr->index = to_index;
+        new_ptr->v = to_vertex;
         new_ptr->next = from_vertex->neighbors;
         from_vertex->neighbors = new_ptr;
     }

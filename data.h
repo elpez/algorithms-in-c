@@ -1,14 +1,15 @@
 #pragma once
 
+struct Vertex;
+
 
 typedef struct VertexList_rec {
-    /* The index of the vertex in the graph's vertices array. */
-    size_t index;
+    struct Vertex* v;
     struct VertexList_rec* next;
 } VertexList;
 
 
-typedef struct {
+typedef struct Vertex {
     char val;
     VertexList* neighbors;
 } Vertex;

@@ -186,20 +186,21 @@ int* depth_first_search(const Graph* g) {
     #define STACK_PUSH(val) stack[end_of_stack++] = (val)
     if (g == NULL) return NULL;
     size_t end_of_stack = 0;
-    size_t* stack = malloc(g->n * sizeof *stack);
+    Vertex** stack = malloc(g->n * sizeof *stack);
     int* counts = calloc(g->n, sizeof *counts);
     int max_count = 0;
     /* Start at each vertex (this ensures that every component is visited). */
     for (size_t i = 0; i < g->n; i++) {
-        STACK_PUSH(i);
+        STACK_PUSH(g->vertices + i);
         while (end_of_stack > 0) {
-            size_t this_vertex = STACK_POP();
-            if (counts[this_vertex] == 0) {
-                counts[this_vertex] = ++max_count;
-                VertexList* p = g->vertices[this_vertex].neighbors;
+            Vertex* this_vertex = STACK_POP();
+            size_t this_index = this_vertex - g->vertices;
+            if (counts[this_index] == 0) {
+                counts[this_index] = ++max_count;
+                VertexList* p = this_vertex->neighbors;
                 /* Push all adjacents vertices onto the stack. */
                 while (p != NULL) {
-                    STACK_PUSH(p->index);
+                    STACK_PUSH(p->v);
                     p = p->next;
                 }
             }
@@ -413,7 +414,7 @@ void print_graph(const Graph* g) {
         char c = g->vertices[i].val;
         VertexList* p = g->vertices[i].neighbors;
         while (p != NULL) {
-            printf("%c%c ", c, g->vertices[p->index].val);
+            printf("%c%c ", c, p->v->val);
             p = p->next;
         }
     }
