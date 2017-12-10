@@ -186,8 +186,8 @@ int* depth_first_search(const Graph* g) {
     #define STACK_PUSH(val) stack[end_of_stack++] = (val)
     if (g == NULL) return NULL;
     size_t end_of_stack = 0;
-    Vertex** stack = malloc(g->n * sizeof *stack);
-    int* counts = calloc(g->n, sizeof *counts);
+    Vertex** stack = safe_malloc(g->n * sizeof *stack);
+    int* counts = safe_calloc(g->n, sizeof *counts);
     int max_count = 0;
     /* Start at each vertex (this ensures that every component is visited). */
     for (size_t i = 0; i < g->n; i++) {
@@ -342,14 +342,14 @@ double closest_pair(Point sorted_by_x[], Point sorted_by_y[], size_t n) {
     if (n > 3) {
         size_t right_n = n / 2;
         size_t left_n = n - right_n;
-        Point* right_sorted_x = malloc(right_n * sizeof *right_sorted_x);
-        Point* right_sorted_y = malloc(right_n * sizeof *right_sorted_y);
+        Point* right_sorted_x = safe_malloc(right_n * sizeof *right_sorted_x);
+        Point* right_sorted_y = safe_malloc(right_n * sizeof *right_sorted_y);
         for (size_t i = 0; i < right_n; i++) {
             right_sorted_x[i] = sorted_by_x[left_n + i];
             right_sorted_y[i] = sorted_by_y[left_n + i];
         }
-        Point* left_sorted_x = malloc(left_n * sizeof *left_sorted_x);
-        Point* left_sorted_y = malloc(left_n * sizeof *left_sorted_y);
+        Point* left_sorted_x = safe_malloc(left_n * sizeof *left_sorted_x);
+        Point* left_sorted_y = safe_malloc(left_n * sizeof *left_sorted_y);
         for (size_t i = 0; i < left_n; i++) {
             left_sorted_x[i] = sorted_by_x[i];
             left_sorted_y[i] = sorted_by_y[i];
@@ -359,7 +359,7 @@ double closest_pair(Point sorted_by_x[], Point sorted_by_y[], size_t n) {
         double d_right = closest_pair(right_sorted_x, right_sorted_y, right_n);
         double d = fmin(d_left, d_right);
         double m = sorted_by_x[left_n - 1].x;
-        Point* points_near_median = malloc(n * sizeof *points_near_median);
+        Point* points_near_median = safe_malloc(n * sizeof *points_near_median);
         size_t num_near_median = 0;
         for (size_t i = 0; i < n; i++) {
             Point p = sorted_by_y[i];
@@ -431,11 +431,9 @@ void swap(int array[], size_t i, size_t j) {
 
 int* copy_array(int source[], size_t start, size_t end) {
     size_t n = end - start;
-    int* ret = malloc(n * sizeof *ret);
-    if (ret) {
-        for (size_t i = 0; i < n; i++) {
-            ret[i] = source[start+i];
-        }
+    int* ret = safe_malloc(n * sizeof *ret);
+    for (size_t i = 0; i < n; i++) {
+        ret[i] = source[start+i];
     }
     return ret;
 }

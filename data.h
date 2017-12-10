@@ -49,3 +49,9 @@ void print_graph(const Graph*);
 typedef struct {
     double x, y;
 } Point;
+
+
+/* "Safe" memory allocators that will never return NULL pointers. */
+void* safe_malloc(size_t);
+void* safe_calloc(size_t, size_t);
+void* safe_realloc(void*, size_t);
