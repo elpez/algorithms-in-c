@@ -65,6 +65,16 @@ size_t partition(int array[], size_t start, size_t end);
 double closest_pair(Point sorted_by_x[], Point sorted_by_y[], size_t n);
 
 
+/*****************************************
+ *   CHAPTER 6 - TRANSFORM and CONQUER   *
+ *****************************************/
+
+/* Sort the elements of `array` in ascending order. */
+void heapsort(int array[], size_t n);
+void heapify(int array[], size_t n);
+void heap_delete(int heap[], size_t n);
+
+
 /*************************
  *   UTILITY FUNCTIONS   *
  *************************/
@@ -111,3 +121,4 @@ int test_sorting_f(sorting_f f);
 int ch03_tests(void);
 int ch04_tests(void);
 int ch05_tests(void);
+int ch06_tests(void);

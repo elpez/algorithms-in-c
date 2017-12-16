@@ -1,5 +1,5 @@
 CC = gcc
-SRCS = ch03_brute_force.c ch04_decrease_and_conquer.c ch05_divide_and_conquer.c main.c utilities.c data_structures.c
+SRCS = main.c utilities.c data_structures.c ch03_brute_force.c ch04_decrease_and_conquer.c ch05_divide_and_conquer.c ch06_transform_and_conquer.c
 
 
 all: $(SRCS) algorithms.h data_structures.h
