@@ -15,42 +15,16 @@
 
 
 /* Return 1 if the array is sorted in ascending order, 0 otherwise. */
-int is_sorted(int* data, size_t n) {
-    for (size_t i = 0; i < n-1; i++) {
-        if (data[i] > data[i+1]) {
-            return 0;
-        }
-    }
-    return 1;
-}
+int is_sorted(int* data, size_t n);
 
 
-int array_eq(size_t n, int array[], ...) {
-    va_list args;
-    va_start(args, array);
-    for (size_t i = 0; i < n; i++) {
-        int x = va_arg(args, int);
-        if (array[i] != x) {
-            return 0;
-        }
-    }
-    return 1;
-}
+/* Return 1 if the array of size `n` is equal to the `n` variadic arguments. */
+int array_eq(size_t n, int array[], ...);
 
-
-typedef void sorting_f(int*, size_t);
 
 /* Run the sorting test suite against an arbitrary sorting function. */
-int test_sorting_f(sorting_f f) {
-    int data[] = {-8, 99, 7, 8, 9, -2, 0, 1, 4, 59, 42, 10};
-    size_t n = 12;
-    f(data, n);
-    if (is_sorted(data, n)) {
-        return 0;
-    } else {
-        return 1;
-    }
-}
+typedef void sorting_f(int*, size_t);
+int test_sorting_f(sorting_f f);
 
 
 void run_tests(void) {
@@ -111,4 +85,39 @@ void run_tests(void) {
 int main(int argc, char* argv[]) {
     run_tests();
     return 0;
+}
+
+
+int is_sorted(int* data, size_t n) {
+    for (size_t i = 0; i < n-1; i++) {
+        if (data[i] > data[i+1]) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+
+int array_eq(size_t n, int array[], ...) {
+    va_list args;
+    va_start(args, array);
+    for (size_t i = 0; i < n; i++) {
+        int x = va_arg(args, int);
+        if (array[i] != x) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+
+int test_sorting_f(sorting_f f) {
+    int data[] = {-8, 99, 7, 8, 9, -2, 0, 1, 4, 59, 42, 10};
+    size_t n = 12;
+    f(data, n);
+    if (is_sorted(data, n)) {
+        return 0;
+    } else {
+        return 1;
+    }
 }
