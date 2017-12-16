@@ -175,3 +175,25 @@ double closest_pair(Point sorted_by_x[], Point sorted_by_y[], size_t n) {
         return closest_pair_brute_force(sorted_by_x, n);
     }
 }
+
+
+int ch05_tests() {
+    puts("\n=== CHAPTER 5 TESTS ===");
+    int tests_failed = 0;
+
+    /* MERGE SORT */
+    puts("Testing merge sort");
+    ASSERT(test_sorting_f(merge_sort) == 0);
+
+    /* QUICKSORT */
+    puts("Testing quicksort");
+    ASSERT(test_sorting_f(quicksort) == 0);
+
+    /* CLOSEST PAIR */
+    puts("Testing closest pair");
+    Point points_by_x[] = { {2, 3}, {3, 1}, {7, 3}, {7, 1} };
+    Point points_by_y[] = { {3, 1}, {7, 1}, {2, 3}, {7, 3} };
+    ASSERT(closest_pair(points_by_x, points_by_y, 4) == 2);
+
+    return tests_failed;
+}

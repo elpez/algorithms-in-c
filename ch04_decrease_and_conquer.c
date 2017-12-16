@@ -95,3 +95,34 @@ int* depth_first_search(const Graph* g) {
     free(stack);
     return counts;
 }
+
+
+int ch04_tests() {
+    puts("\n=== CHAPTER 4 TESTS ===");
+    int tests_failed = 0;
+
+    /* INSERTION SORT */
+    puts("Testing insertion sort");
+    ASSERT(test_sorting_f(insertion_sort) == 0);
+
+    /* BINARY SEARCH */
+    puts("Testing binary search");
+    int bs_data[] = {-7, 4, 8, 9, 17};
+    ASSERT(binary_search(bs_data, 5, -7) == 0);
+    ASSERT(binary_search(bs_data, 5, 4) == 1);
+    ASSERT(binary_search(bs_data, 5, 8) == 2);
+    ASSERT(binary_search(bs_data, 5, 9) == 3);
+    ASSERT(binary_search(bs_data, 5, 17) == 4);
+    ASSERT(binary_search(bs_data, 5, 42) == -1);
+
+    /* DEPTH-FIRST SEARCH */
+    puts("Testing depth-first search");
+    Graph* g = graph_from_string(DIRECTED, "ABCDEFG", "AB AC BG BE CF DA DB DC DF DG GF");
+    int* counts = depth_first_search(g);
+    /* Expected order: A, B, G, F, E, C, D */
+    ASSERT(array_eq(7, counts, 1, 2, 6, 7, 5, 4, 3));
+    free(counts);
+    graph_free(g);
+
+    return tests_failed;
+}

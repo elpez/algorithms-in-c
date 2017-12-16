@@ -77,3 +77,27 @@ double closest_pair_brute_force(Point points[], size_t n) {
         return 0.0;
     }
 }
+
+
+int ch03_tests() {
+    puts("\n=== CHAPTER 3 TESTS ===");
+    int tests_failed = 0;
+
+    /* SELECTION SORT */
+    puts("Testing selection sort");
+    ASSERT(test_sorting_f(selection_sort) == 0);
+
+    /* LINEAR SEARCH */
+    puts("Testing linear search");
+    int ls_data[] = {1, 2, 3, 4, 3};
+    ASSERT(linear_search(ls_data, 5, 3) == 2);
+    ASSERT(linear_search(ls_data, 5, 1) == 0);
+    ASSERT(linear_search(ls_data, 5, 7) == -1);
+
+    /* BRUTE-FORCE CLOSEST PAIR */
+    puts("Testing brute-force closest pair");
+    Point points[] = { {7, 3}, {7, 1}, {2, 3}, {3, 1} };
+    ASSERT(closest_pair_brute_force(points, 4) == 2);
+
+    return tests_failed;
+}

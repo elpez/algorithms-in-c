@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdio.h>
 #include <stddef.h>
 #include <math.h>
 #include "data_structures.h"
@@ -63,17 +64,45 @@ double closest_pair(Point sorted_by_x[], Point sorted_by_y[], size_t n);
  *   UTILITY FUNCTIONS   *
  *************************/
 
-
 void swap(int array[], size_t i, size_t j);
 
 int* copy_array(int source[], size_t start, size_t end);
+
+/* Return 1 if the array of size `n` is equal to the `n` variadic arguments. */
 int array_eq(size_t n, int array[], ...);
+
+/* Print the array to stdout, followed by a line break. */
 void print_array(int array[], size_t n);
 
-#define distance_squared(p1, p2) (pow((p1).x - (p2).x, 2) + pow((p1).y - (p2).y, 2))
+/* Return 1 if the array is sorted in ascending order, 0 otherwise. */
+int is_sorted(int* data, size_t n);
 
+#define distance_squared(p1, p2) (pow((p1).x - (p2).x, 2) + pow((p1).y - (p2).y, 2))
 
 /* "Safe" memory allocators that will never return NULL pointers. */
 void* safe_malloc(size_t);
 void* safe_calloc(size_t, size_t);
 void* safe_realloc(void*, size_t);
+
+/* Run the sorting test suite against an arbitrary sorting function. */
+typedef void sorting_f(int*, size_t);
+int test_sorting_f(sorting_f f);
+
+/* This is defined as a macro to preserve the line number. It assumes the existence of a variable
+ * tests_failed, which it updates.
+ */
+#define ASSERT(cond) \
+    if (!(cond)) { \
+        printf("*  Failed test \"%s\" at line %d in %s\n", #cond, __LINE__, __FILE__); \
+        tests_failed++; \
+    }
+
+
+
+/******************
+ *   TEST SUITE   *
+ ******************/
+
+int ch03_tests(void);
+int ch04_tests(void);
+int ch05_tests(void);

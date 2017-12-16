@@ -1,3 +1,4 @@
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "algorithms.h"
@@ -59,4 +60,39 @@ void* safe_realloc(void* ptr, size_t size) {
         exit(1);
     }
     return ret;
+}
+
+
+int test_sorting_f(sorting_f f) {
+    int data[] = {-8, 99, 7, 8, 9, -2, 0, 1, 4, 59, 42, 10};
+    size_t n = 12;
+    f(data, n);
+    if (is_sorted(data, n)) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+
+int is_sorted(int* data, size_t n) {
+    for (size_t i = 0; i < n-1; i++) {
+        if (data[i] > data[i+1]) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+
+int array_eq(size_t n, int array[], ...) {
+    va_list args;
+    va_start(args, array);
+    for (size_t i = 0; i < n; i++) {
+        int x = va_arg(args, int);
+        if (array[i] != x) {
+            return 0;
+        }
+    }
+    return 1;
 }
