@@ -34,8 +34,13 @@ void insertion_sort(int array[], size_t n);
 long long binary_search(int array[], size_t n, int datum);
 
 
-/* Traverse the graph depth-first and return an array indicating the order in which each vertex was
- * visited, starting at 1.
+/* Traverse the graph depth-first and return a heap-allocated array indicating the order in which
+ * each vertex was visited, starting at 1.
+ */
+int* depth_first_search(const Graph* g);
+
+/* Traverse the graph breadth-first and return a heap-allocated array indicating the order in which
+ * each vertex was visited, starting at 1.
  */
 int* depth_first_search(const Graph* g);
 
