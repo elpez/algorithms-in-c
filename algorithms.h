@@ -73,6 +73,7 @@ double closest_pair(Point sorted_by_x[], Point sorted_by_y[], size_t n);
 void heapsort(int array[], size_t n);
 void heapify(int array[], size_t n);
 void heap_delete(int heap[], size_t n);
+void fix_heap(size_t index, int heap[], size_t n);
 
 
 /*************************
