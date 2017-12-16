@@ -1,6 +1,3 @@
 *.swp
 *.o
 algorithms
-
-# Ignoring makefile because it's trivial
-makefile

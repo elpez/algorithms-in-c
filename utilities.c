@@ -1,7 +1,62 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "data.h"
+#include "algorithms.h"
+
+
+void print_graph(const Graph* g) {
+    if (g == NULL) return;
+
+    printf("NODES: ");
+    for (size_t i = 0; i < g->n; i++) {
+        printf("%c", g->vertices[i].val);
+        if (i != g->n - 1) {
+            printf(", ");
+        } else {
+            printf("\n");
+        }
+    }
+
+    printf("EDGES: ");
+    for (size_t i = 0; i < g->n; i++) {
+        char c = g->vertices[i].val;
+        VertexList* p = g->vertices[i].neighbors;
+        while (p != NULL) {
+            printf("%c%c ", c, p->v->val);
+            p = p->next;
+        }
+    }
+    printf("\n");
+}
+
+
+void swap(int array[], size_t i, size_t j) {
+    int tmp = array[i];
+    array[i] = array[j];
+    array[j] = tmp;
+}
+
+
+int* copy_array(int source[], size_t start, size_t end) {
+    size_t n = end - start;
+    int* ret = safe_malloc(n * sizeof *ret);
+    for (size_t i = 0; i < n; i++) {
+        ret[i] = source[start+i];
+    }
+    return ret;
+}
+
+
+void print_array(int array[], size_t n) {
+    printf("[");
+    for (size_t i = 0; i < n; i++) {
+        printf("%d", array[i]);
+        if (i != n - 1) {
+            printf(", ");
+        }
+    }
+    printf("]\n");
+}
 
 
 /* Add a directed edge to the graph. */
