@@ -45,6 +45,13 @@ void insertion_sort(int array[], size_t n);
 long long binary_search(int array[], size_t n, int datum);
 
 
+/* Return an ordering of a directed acyclic graph so that all edges point forwards along the
+ * ordering. The return value is a malloc'd array `ranks` where `ranks[i]` is equal to the i'th
+ * vertex's position in the sort. Multiple vertices may receive the same rank.
+ */
+int* topological_sort(const Graph* g);
+
+
 /**************************************
  *   CHAPTER 5 - DIVIDE and CONQUER   *
  **************************************/

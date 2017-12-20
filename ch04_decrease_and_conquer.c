@@ -55,7 +55,16 @@ long long binary_search(int array[], size_t n, int datum) {
 
 
 /* Return an ordering of a directed acyclic graph so that all edges point forwards along the
- * ordering.
+ * ordering. The return value is a malloc'd array `ranks` where `ranks[i]` is equal to the i'th
+ * vertex's position in the sort. Multiple vertices may receive the same rank.
+ *
+ *   Idea: Identify a "source," a vertex with no incoming edges. Give this vertex a rank of 0 and
+ *   remove all its outgoing edges from the graph. Find another source in the new graph, and
+ *   continue.
+ *
+ *   Time complexity: O(|V| + |E|).
+ *
+ *   Space complexity: O(|V|) for the queue and in_degrees array.
  */
 int* topological_sort(const Graph* g) {
     int* in_degrees = safe_calloc(g->n, sizeof *in_degrees);
