@@ -86,33 +86,32 @@ double closest_pair_brute_force(Point points[], size_t n) {
  *
  *  Idea: Mark each vertex of the graph with 0. Visit the first vertex, mark it with 1, then visit
  *  that vertex's first (unmarked) neighbor, mark it with 2, and continue until you reach a dead
- *  end. Backtrack to a vertex with unmarked neighbors and continue from there.
+ *  end. Backtrack to a vertex with unmarked neighbors and continue marking vertices from there,
+ *  until backtracking fails to find a vertex with unmarked neighbors.
  *
- *  Time analysis: Every vertex must be visited, and each edge of every vertex must be considered,
- *  so the time complexity is O(|E| + |V|).
+ *  Time analysis: The for loop iterates over every vertex in the graph, and the nested while loop
+ *  considers each edge, so the time complexity is O(|E| + |V|).
  *
- *  Space analysis: O(|V|) for the counts array and vertex stack.
+ *  Space analysis: O(|V|) in the worst case for the vertex stack (imagine a graph that looks like
+ *  this: o->o->o->o).
  */
 int* depth_first_search(const Graph* g) {
     if (g == NULL) return NULL;
     VertexStack* stack = stack_new(g->n);
     int* counts = safe_calloc(g->n, sizeof *counts);
     int max_count = 0;
-    /* Start at each vertex (this ensures that every component is visited). */
+    /* Start at each vertex to ensure that every component is visited. */
     for (size_t i = 0; i < g->n; i++) {
         if (counts[i] > 0)
             continue;
         stack_push(stack, g->vertices + i);
         while (!stack_empty(stack)) {
             Vertex* this_vertex = stack_pop(stack);
-            size_t this_index = this_vertex - g->vertices;
-            if (counts[this_index] == 0) {
-                counts[this_index] = ++max_count;
-                VertexList* p = this_vertex->neighbors;
-                /* Push all adjacents vertices onto the stack. */
-                while (p != NULL) {
+            counts[this_vertex - g->vertices] = ++max_count;
+            /* Push all adjacents vertices onto the stack. */
+            for (VertexList* p = this_vertex->neighbors; p != NULL; p = p->next) {
+                if (counts[p->v - g->vertices] == 0) {
                     stack_push(stack, p->v);
-                    p = p->next;
                 }
             }
         }
@@ -129,30 +128,27 @@ int* depth_first_search(const Graph* g) {
  *  Idea: Same idea as depth-first search, except use a queue instead of a stack so that every
  *  neighbor of a vertex is visited before any other vertex is.
  *
- *  Time analysis: Every vertex must be visited, and each edge of every vertex must be considered,
- *  so the time complexity is O(|E| + |V|).
+ *  Time analysis: Same as depth-first search: O(|V| + |E|).
  *
- *  Space analysis: O(|V|) for the counts array and vertex queue.
+ *  Space analysis: O(|V|) in the worst case for the vertex queue (imagine a graph where every
+ *  vertex was connected only to a single central vertex).
  */
 int* breadth_first_search(const Graph* g) {
     VertexQueue* queue = queue_new(g->n);
     int* counts = safe_calloc(g->n, sizeof *counts);
     int max_count = 0;
-    /* Start at each vertex (this ensures that every component is visited). */
+    /* Start at each vertex to ensure that every component is visited. */
     for (size_t i = 0; i < g->n; i++) {
         if (counts[i] > 0)
             continue;
         queue_push(queue, g->vertices + i);
         while (!queue_empty(queue)) {
             Vertex* this_vertex = queue_pop(queue);
-            size_t this_index = this_vertex - g->vertices;
-            if (counts[this_index] == 0) {
-                counts[this_index] = ++max_count;
-                VertexList* p = this_vertex->neighbors;
-                /* Push all adjacents vertices onto the stack. */
-                while (p != NULL) {
+            counts[this_vertex - g->vertices] = ++max_count;
+            /* Push all adjacents vertices onto the stack. */
+            for (VertexList* p = this_vertex->neighbors; p != NULL; p = p->next) {
+                if (counts[p->v - g->vertices] == 0) {
                     queue_push(queue, p->v);
-                    p = p->next;
                 }
             }
         }
