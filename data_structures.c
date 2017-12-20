@@ -99,4 +99,61 @@ void graph_free(Graph* g) {
 }
 
 
+VertexStack* stack_new(size_t n) {
+    VertexStack* ret = safe_malloc(sizeof* ret);
+    ret->data = safe_malloc(n * sizeof *ret->data);
+    ret->len = 0;
+    ret->capacity = n;
+    return ret;
+}
 
+
+void stack_free(VertexStack* stack) {
+    free(stack->data);
+    free(stack);
+}
+
+
+Vertex* stack_pop(VertexStack* stack) {
+    return stack->data[--stack->len];
+}
+
+
+void stack_push(VertexStack* stack, Vertex* v) {
+    stack->data[stack->len++] = v;
+}
+
+
+bool stack_empty(const VertexStack* stack) {
+    return stack->len == 0;
+}
+
+
+VertexQueue* queue_new(size_t n) {
+    VertexQueue* ret = safe_malloc(sizeof *ret);
+    ret->data = safe_malloc(n * sizeof *ret->data);
+    ret->head = ret->tail = 0;
+    ret->capacity = n;
+    return ret;
+}
+
+
+void queue_free(VertexQueue* queue) {
+    free(queue->data);
+    free(queue);
+}
+
+
+Vertex* queue_pop(VertexQueue* queue) {
+    return queue->data[queue->tail++ % queue->capacity];
+}
+
+
+void queue_push(VertexQueue* queue, Vertex* v) {
+    queue->data[queue->head++ % queue->capacity] = v;
+}
+
+
+bool queue_empty(const VertexQueue* queue) {
+    return queue->head == queue->tail;
+}

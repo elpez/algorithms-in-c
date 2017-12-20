@@ -94,33 +94,30 @@ double closest_pair_brute_force(Point points[], size_t n) {
  *  Space analysis: O(|V|) for the counts array and vertex stack.
  */
 int* depth_first_search(const Graph* g) {
-    #define STACK_POP() (stack[--end_of_stack])
-    #define STACK_PUSH(val) stack[end_of_stack++] = (val)
     if (g == NULL) return NULL;
-    size_t end_of_stack = 0;
-    Vertex** stack = safe_malloc(g->n * sizeof *stack);
+    VertexStack* stack = stack_new(g->n);
     int* counts = safe_calloc(g->n, sizeof *counts);
     int max_count = 0;
     /* Start at each vertex (this ensures that every component is visited). */
     for (size_t i = 0; i < g->n; i++) {
         if (counts[i] > 0)
             continue;
-        STACK_PUSH(g->vertices + i);
-        while (end_of_stack > 0) {
-            Vertex* this_vertex = STACK_POP();
+        stack_push(stack, g->vertices + i);
+        while (!stack_empty(stack)) {
+            Vertex* this_vertex = stack_pop(stack);
             size_t this_index = this_vertex - g->vertices;
             if (counts[this_index] == 0) {
                 counts[this_index] = ++max_count;
                 VertexList* p = this_vertex->neighbors;
                 /* Push all adjacents vertices onto the stack. */
                 while (p != NULL) {
-                    STACK_PUSH(p->v);
+                    stack_push(stack, p->v);
                     p = p->next;
                 }
             }
         }
     }
-    free(stack);
+    stack_free(stack);
     return counts;
 }
 
@@ -138,32 +135,29 @@ int* depth_first_search(const Graph* g) {
  *  Space analysis: O(|V|) for the counts array and vertex queue.
  */
 int* breadth_first_search(const Graph* g) {
-    #define QUEUE_PUT(x) queue[tail++ % g->n] = (x)
-    #define QUEUE_POP() (queue[head++ % g->n])
-    Vertex** queue = safe_malloc(g->n * sizeof *queue);
-    size_t head = 0, tail = 0;
+    VertexQueue* queue = queue_new(g->n);
     int* counts = safe_calloc(g->n, sizeof *counts);
     int max_count = 0;
     /* Start at each vertex (this ensures that every component is visited). */
     for (size_t i = 0; i < g->n; i++) {
         if (counts[i] > 0)
             continue;
-        QUEUE_PUT(g->vertices + i);
-        while (head != tail) {
-            Vertex* this_vertex = QUEUE_POP();
+        queue_push(queue, g->vertices + i);
+        while (!queue_empty(queue)) {
+            Vertex* this_vertex = queue_pop(queue);
             size_t this_index = this_vertex - g->vertices;
             if (counts[this_index] == 0) {
                 counts[this_index] = ++max_count;
                 VertexList* p = this_vertex->neighbors;
                 /* Push all adjacents vertices onto the stack. */
                 while (p != NULL) {
-                    QUEUE_PUT(p->v);
+                    queue_push(queue, p->v);
                     p = p->next;
                 }
             }
         }
     }
-    free(queue);
+    queue_free(queue);
     return counts;
 }
 

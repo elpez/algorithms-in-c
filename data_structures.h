@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdbool.h>
+
 
 struct Vertex;
 typedef struct VertexList_rec {
@@ -21,8 +23,30 @@ typedef struct {
 
 
 typedef struct {
+    size_t n;
+    char* vals;
+    /* An array of length n^2 where each true entry (i, j) indicates an edge between i and j. */
+    bool* edges;
+} GraphMatrix;
+
+
+typedef struct {
     double x, y;
 } Point;
+
+
+/* Used for depth-first searching a graph. */
+typedef struct {
+    size_t len, capacity;
+    Vertex** data;
+} VertexStack;
+
+
+/* Used for breadth-first searching a graph. */
+typedef struct {
+    size_t head, tail, capacity;
+    Vertex** data;
+} VertexQueue;
 
 
 /* Construct a graph from a string of single-letter vertex names and a string of space-separated
@@ -48,3 +72,17 @@ void vertex_list_free(VertexList* p);
 
 /* Print the vertices and edges of the graph as strings. */
 void print_graph(const Graph*);
+
+
+VertexStack* stack_new(size_t);
+void stack_free(VertexStack*);
+Vertex* stack_pop(VertexStack*);
+void stack_push(VertexStack*, Vertex*);
+bool stack_empty(const VertexStack*);
+
+
+VertexQueue* queue_new(size_t);
+void queue_free(VertexQueue*);
+Vertex* queue_pop(VertexQueue*);
+void queue_push(VertexQueue*, Vertex*);
+bool queue_empty(const VertexQueue*);
