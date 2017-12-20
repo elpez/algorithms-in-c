@@ -54,6 +54,44 @@ long long binary_search(int array[], size_t n, int datum) {
 }
 
 
+/* Return an ordering of a directed acyclic graph so that all edges point forwards along the
+ * ordering.
+ */
+int* topological_sort(const Graph* g) {
+    int* in_degrees = safe_calloc(g->n, sizeof *in_degrees);
+    int* ranks = safe_calloc(g->n, sizeof *ranks);
+    /* Calculate the in-degree of each vertex. */
+    for (size_t i = 0; i < g->n; i++) {
+        for (VertexList* p = g->vertices[i].neighbors; p != NULL; p = p->next) {
+            in_degrees[p->v - g->vertices]++;
+        }
+    }
+    VertexQueue* queue = queue_new(g->n);
+    /* Add sources (vertices with no incoming edges) to the queue. */
+    for (size_t i = 0; i < g->n; i++) {
+        if (in_degrees[i] == 0) {
+            queue_push(queue, g->vertices + i);
+        }
+    }
+    while (!queue_empty(queue)) {
+        Vertex* source = queue_pop(queue);
+        size_t source_index = (source - g->vertices);
+        for (VertexList* p = source->neighbors; p != NULL; p = p->next) {
+            size_t index = (p->v - g->vertices);
+            /* Decrease in-degree since v is being removed from consideration. */
+            in_degrees[index]--;
+            ranks[index] = fmax(ranks[index], 1 + ranks[source_index]);
+            if (in_degrees[index] == 0) {
+                queue_push(queue, p->v);
+            }
+        }
+    }
+    queue_free(queue);
+    free(in_degrees);
+    return ranks;
+}
+
+
 int ch04_tests() {
     puts("\n=== CHAPTER 4 TESTS ===");
     int tests_failed = 0;
@@ -71,6 +109,16 @@ int ch04_tests() {
     ASSERT(binary_search(bs_data, 5, 9) == 3);
     ASSERT(binary_search(bs_data, 5, 17) == 4);
     ASSERT(binary_search(bs_data, 5, 42) == -1);
+
+    /* TOPOLOGICAL SORTING */
+    puts("Testing topological sorting");
+    /* The graph from exercise 1a in section 4.2, page 142. */
+    Graph* g = graph_from_string(DIRECTED, "ABCDEFG", "AC AB BG BE CF DG DF DC DB DA GF GE");
+    int* ranks = topological_sort(g);
+    /* Expected order: D, A, {B, C}, G, {E, F} */
+    ASSERT(array_eq(7, ranks, 1, 2, 2, 0, 4, 4, 3));
+    free(ranks);
+    graph_free(g);
 
     return tests_failed;
 }
