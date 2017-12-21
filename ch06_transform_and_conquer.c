@@ -12,9 +12,9 @@
  *   Idea: Convert the array to a max heap and then successively delete the maximum element from the
  *   heap and put it at the end.
  *
- *   Time analysis: Heapification is O(n) (although our analysis showing it to be O(n log n) does
- *   not change the final answer), so the running time is dominated by the n calls to the O(log n)
- *   heap_delete function, making it O(n log n) overall.
+ *   Time analysis: Heapification is O(n) (although the analysis below showing it to be O(n log n)
+ *   does not change the final answer), so the running time is dominated by the n calls to the
+ *   O(log n) heap_delete function, making it O(n log n) overall.
  *
  *   Space analysis: O(1).
  */
@@ -46,8 +46,8 @@ void heapify(int array[], size_t n) {
 }
 
 
-/* Swap the maximum element of the heap to the end and fix the heap to maintain the invariant. 
- * 
+/* Swap the maximum element of the heap to the end and fix the heap to maintain the invariant.
+ *
  *   Time analysis: O(log n), same as fix_heap.
  *
  *   Space analysis: O(1), same as fix_heap.

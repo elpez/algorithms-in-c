@@ -14,9 +14,11 @@
  *   Space analysis: O(1).
  */
 void insertion_sort(int array[], size_t n) {
+    /* After each iteration of the loop, array[0...i] is sorted. */
     for (size_t i = 1; i < n; i++) {
         int v = array[i];
         size_t j = i-1;
+        /* Move v to its proper place in the sorted array. */
         while (j >= 0 && array[j] > v) {
             array[j+1] = array[j];
             j--;
@@ -38,6 +40,9 @@ void insertion_sort(int array[], size_t n) {
  *   Space analysis: O(1).
  */
 long long binary_search(int array[], size_t n, int datum) {
+    /* Binary search also has a somewhat simpler recursive implementation, but it is O(log n) space
+     * because of the call stack.
+     */
     size_t start = 0, end = n;
     while (start < end) {
         size_t mid = (end + start) / 2;
@@ -67,6 +72,7 @@ long long binary_search(int array[], size_t n, int datum) {
  *   Space complexity: O(|V|) for the queue and in_degrees array.
  */
 int* topological_sort(const Graph* g) {
+    /* The in-degree of a vertex is the number of edges that go into it. */
     int* in_degrees = safe_calloc(g->n, sizeof *in_degrees);
     int* ranks = safe_calloc(g->n, sizeof *ranks);
     /* Calculate the in-degree of each vertex. */
@@ -76,12 +82,13 @@ int* topological_sort(const Graph* g) {
         }
     }
     VertexQueue* queue = queue_new(g->n);
-    /* Add sources (vertices with no incoming edges) to the queue. */
+    /* Add sources (vertices with no incoming edges, so in-degree = 0) to the queue. */
     for (size_t i = 0; i < g->n; i++) {
         if (in_degrees[i] == 0) {
             queue_push(queue, g->vertices + i);
         }
     }
+    /* The queue holds all the current sources in the graph. */
     while (!queue_empty(queue)) {
         Vertex* source = queue_pop(queue);
         size_t source_index = (source - g->vertices);

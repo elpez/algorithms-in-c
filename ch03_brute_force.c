@@ -64,6 +64,10 @@ long long linear_search(int array[], size_t n, int datum) {
  */
 double closest_pair_brute_force(Point points[], size_t n) {
     if (n >= 2) {
+        /* A minor optimization is to compute distance squared instead of distance to avoid the
+         * expensive square root operation. Valid because the square root function is monotonically
+         * increasing.
+         */
         double closest_so_far = distance_squared(points[0], points[1]);
         for (size_t i = 0; i < n-1; i++) {
             for (size_t j = i+1; j < n; j++) {
@@ -103,8 +107,10 @@ int* depth_first_search(const Graph* g) {
     /* Start at each vertex to ensure that every component is visited. */
     for (size_t i = 0; i < g->n; i++) {
         if (counts[i] > 0)
+            /* Skip vertices that have already been traversed. */
             continue;
         stack_push(stack, g->vertices + i);
+        /* This loop visits each vertex in a connected component. */
         while (!stack_empty(stack)) {
             Vertex* this_vertex = stack_pop(stack);
             counts[this_vertex - g->vertices] = ++max_count;
@@ -140,8 +146,10 @@ int* breadth_first_search(const Graph* g) {
     /* Start at each vertex to ensure that every component is visited. */
     for (size_t i = 0; i < g->n; i++) {
         if (counts[i] > 0)
+            /* Skip vertices that have already been traversed. */
             continue;
         queue_push(queue, g->vertices + i);
+        /* This loop visits each vertex in a connected component. */
         while (!queue_empty(queue)) {
             Vertex* this_vertex = queue_pop(queue);
             counts[this_vertex - g->vertices] = ++max_count;

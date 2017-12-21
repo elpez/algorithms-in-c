@@ -60,9 +60,10 @@ void merge(int left[], size_t left_len, int right[], size_t right_len, int targe
  *   array made by the pivot.
  *
  *   Time analysis: In the worst case, partitioning always reduce the array's size by 1, so n
- *   partitions, each of which take O(n) time, are needed, so the algorithm is O(n^2). In the
- *   average case, each partition divides the array roughly in half, and so log n partitions are
- *   performed, giving a complexity of O(n log n).
+ *   partitions, each of which take O(n) time, are needed, making the algorithm O(n^2). In the
+ *   average case, each partition divides the array roughly in half (this can be proven rigorously
+ *   on the assumption that the elements in `array` are randomly distributed), and so log n
+ *   partitions are performed, giving a complexity of O(n log n).
  *
  *   Space analysis: In this implementation, the worst case is O(n) since there may be as many as
  *   n recursive calls to quicksort_helper. More complicated implementations can get O(log n) space
@@ -155,7 +156,8 @@ double closest_pair(Point sorted_by_x[], Point sorted_by_y[], size_t n) {
         }
         double d_sq = d*d;
         /* Find any pairs of points between the two halves that are closer than the closest pairs
-         * in either half alone. This looks like a quadratic loop, but it's really not!
+         * in either half alone. This looks like a quadratic loop, but it's really not! It can be
+         * shown using the pigeonhole principle that the inner loop is bounded by a constant.
          */
         for (size_t i = 0; i < num_near_median - 2; i++) {
             size_t k = i + 1;
